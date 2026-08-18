@@ -16,7 +16,7 @@ export function NewProjectForm() {
     setIsLoading(true);
     const { error } = await supabase
       .from("projects")
-      .insert({ name, description }); // tenant_id will be auto-set by trigger
+      .insert({ name, description }); // tenant_id auto-set by trigger
     if (!error) {
       setName("");
       setDescription("");
