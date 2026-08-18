@@ -20,7 +20,9 @@ export function ProjectList({
         </li>
       ))}
       {initialProjects.length === 0 && (
-        <p className="text-gray-500">No projects yet.</p>
+        <p className="text-gray-500">
+          No projects yet. Create your first one above!
+        </p>
       )}
     </ul>
   );
