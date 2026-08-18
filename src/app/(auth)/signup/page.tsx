@@ -8,21 +8,46 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        // Optionally redirect to onboarding after email confirmation
-        emailRedirectTo: `${location.origin}/onboarding`,
+    setIsLoading(true);
+    setError("");
+
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp(
+      {
+        email,
+        password,
       },
-    });
-    if (error) setError(error.message);
-    else router.push("/onboarding");
+    );
+
+    if (signUpError) {
+      setError(signUpError.message);
+      setIsLoading(false);
+      return;
+    }
+
+    // ✅ If email confirmation is disabled, auto‑login
+    if (signUpData.user) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        setError(signInError.message);
+      } else {
+        router.push("/onboarding");
+      }
+    } else {
+      // If email confirmation is required, redirect to login with a message
+      router.push("/login?message=Check your email to confirm your account.");
+    }
+
+    setIsLoading(false);
   };
 
   return (
@@ -48,9 +73,10 @@ export default function SignupPage() {
         {error && <p className="text-red-500 text-sm">{error}</p>}
         <button
           type="submit"
-          className="w-full p-2 bg-blue-600 text-white rounded"
+          disabled={isLoading}
+          className="w-full p-2 bg-blue-600 text-white rounded disabled:opacity-50"
         >
-          Create Account
+          {isLoading ? "Creating..." : "Create Account"}
         </button>
       </form>
     </div>
