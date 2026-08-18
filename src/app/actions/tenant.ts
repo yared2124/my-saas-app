@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createTenant(formData: FormData) {
+  const supabase = await createClient();
   const supabase = createClient();
   const {
     data: { user },
